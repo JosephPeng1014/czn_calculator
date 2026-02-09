@@ -1,65 +1,105 @@
-import Image from "next/image";
+"use client";
+
+import { useCallback, useState } from "react";
+import CharacterCard, { initialCounts } from "./components/CharacterCard";
+
+function getMaxPoints(tier: number) {
+  return tier * 10 + 20
+}
 
 export default function Home() {
+  const [tier, setTier] = useState(1);
+  const [char1Counts, setChar1Counts] = useState(initialCounts);
+  const [char2Counts, setChar2Counts] = useState(initialCounts);
+  const [char3Counts, setChar3Counts] = useState(initialCounts);
+
+  const maxPoints = getMaxPoints(tier);
+
+  const resetAll = useCallback(() => {
+    setChar1Counts(initialCounts());
+    setChar2Counts(initialCounts());
+    setChar3Counts(initialCounts());
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-slate-900 text-zinc-100">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+            卡厄思計分模擬器
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-zinc-400">TIER</span>
+              <div className="flex items-center gap-0 rounded-lg border border-zinc-600 bg-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setTier((t) => Math.max(1, t - 1))}
+                  className="flex h-9 w-9 items-center justify-center text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                  aria-label="TIER 減少"
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  value={tier}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    if (!Number.isNaN(v)) setTier(Math.max(1, v));
+                  }}
+                  className="h-9 w-10 border-0 border-x border-zinc-600 bg-transparent text-center text-sm font-medium text-white [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setTier((t) => t + 1)}
+                  className="flex h-9 w-9 items-center justify-center text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                  aria-label="TIER 增加"
+                >
+                  +
+                </button>
+              </div>
+
+              <span className="text-sm text-zinc-400">上限: {maxPoints} pt</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={resetAll}
+            className="flex items-center gap-1.5 rounded-full bg-amber-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-amber-500"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <span aria-hidden>↻</span>
+            全部重置
+          </button>
+        </header>
+
+        {/* 三張角色卡片 */}
+        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <CharacterCard
+            characterIndex={1}
+            maxPoints={maxPoints}
+            counts={char1Counts}
+            onCountsChange={setChar1Counts}
+            onReset={() => setChar1Counts(initialCounts())}
+          />
+          <CharacterCard
+            characterIndex={2}
+            maxPoints={maxPoints}
+            counts={char2Counts}
+            onCountsChange={setChar2Counts}
+            onReset={() => setChar2Counts(initialCounts())}
+          />
+          <CharacterCard
+            characterIndex={3}
+            maxPoints={maxPoints}
+            counts={char3Counts}
+            onCountsChange={setChar3Counts}
+            onReset={() => setChar3Counts(initialCounts())}
+          />
+        </section>
+      </div>
     </div>
   );
 }
