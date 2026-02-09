@@ -68,7 +68,7 @@ export default function CharacterCard({
   );
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl bg-zinc-800/90 p-5 shadow-lg">
+    <div className="flex flex-col gap-4 rounded-2xl bg-zinc-800/90 p-4 shadow-lg">
       {/* 標題列：角色名 + 重置按鈕 */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">角色 {characterIndex}</h2>
