@@ -55,17 +55,11 @@ const defaultState: SavedState = {
   char3Counts: initialCounts(),
 };
 
-export default function Home() {
-  const [state, setState] = useState<SavedState>(defaultState);
+/** 僅在 client 掛載後才渲染，並用 lazy 初始值從 localStorage 讀取，第一次畫出就是正確數字、無載入態 */
+function CalculatorContent() {
+  const [state, setState] = useState<SavedState>(() => loadState() ?? defaultState);
   const { tier, nightmareMode, char1Counts, char2Counts, char3Counts } = state;
 
-  // 從 localStorage 還原狀態（僅 client mount 時執行一次，非同步避免 linter 警告）
-  useEffect(() => {
-    const saved = loadState();
-    if (saved) queueMicrotask(() => setState(saved));
-  }, []);
-
-  // 寫入 localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -225,4 +219,16 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+/** 僅在 client 掛載後才渲染 CalculatorContent，搭配 lazy 初始值從 localStorage 讀取，重整時不閃預設值、不顯示載入態 */
+export default function Home() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    queueMicrotask(() => setMounted(true));
+  }, []);
+  if (!mounted) {
+    return <div className="min-h-screen from-slate-950 via-slate-900 to-slate-950" />;
+  }
+  return <CalculatorContent />;
 }
