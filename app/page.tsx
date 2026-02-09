@@ -1,26 +1,111 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import CharacterCard, { initialCounts } from "./components/CharacterCard";
 
-function getMaxPoints(tier: number) {
-  return tier * 10 + 20
+const STORAGE_KEY = "czn_calculator_state";
+const COUNTS_LEN = initialCounts().length;
+
+interface SavedState {
+  tier: number;
+  nightmareMode: boolean;
+  char1Counts: number[];
+  char2Counts: number[];
+  char3Counts: number[];
 }
 
+function loadState(): SavedState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as unknown;
+    if (!data || typeof data !== "object") return null;
+    const d = data as Record<string, unknown>;
+    const tier = Number(d.tier);
+    if (!Number.isInteger(tier) || tier < 1) return null;
+    if (typeof d.nightmareMode !== "boolean") return null;
+    const validCounts = (arr: unknown): arr is number[] =>
+      Array.isArray(arr) &&
+      arr.length === COUNTS_LEN &&
+      arr.every((x) => typeof x === "number" && Number.isInteger(x) && x >= 0);
+    if (!validCounts(d.char1Counts) || !validCounts(d.char2Counts) || !validCounts(d.char3Counts))
+      return null;
+    return {
+      tier,
+      nightmareMode: d.nightmareMode,
+      char1Counts: d.char1Counts,
+      char2Counts: d.char2Counts,
+      char3Counts: d.char3Counts,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getMaxPoints(tier: number) {
+  return tier * 10 + 20;
+}
+
+const defaultState: SavedState = {
+  tier: 1,
+  nightmareMode: false,
+  char1Counts: initialCounts(),
+  char2Counts: initialCounts(),
+  char3Counts: initialCounts(),
+};
+
 export default function Home() {
-  const [tier, setTier] = useState(1);
-  const [nightmareMode, setNightmareMode] = useState(false);
-  const [char1Counts, setChar1Counts] = useState(initialCounts);
-  const [char2Counts, setChar2Counts] = useState(initialCounts);
-  const [char3Counts, setChar3Counts] = useState(initialCounts);
+  const [state, setState] = useState<SavedState>(defaultState);
+  const { tier, nightmareMode, char1Counts, char2Counts, char3Counts } = state;
+
+  // 從 localStorage 還原狀態（僅 client mount 時執行一次，非同步避免 linter 警告）
+  useEffect(() => {
+    const saved = loadState();
+    if (saved) queueMicrotask(() => setState(saved));
+  }, []);
+
+  // 寫入 localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      // ignore quota / private mode
+    }
+  }, [state]);
 
   const effectiveTier = nightmareMode ? tier + 1 : tier;
   const maxPoints = getMaxPoints(effectiveTier);
 
+  const setTier = useCallback((valueOrUpdater: number | ((t: number) => number)) => {
+    setState((s) => ({
+      ...s,
+      tier: Math.max(
+        1,
+        typeof valueOrUpdater === "function" ? valueOrUpdater(s.tier) : valueOrUpdater
+      ),
+    }));
+  }, []);
+  const setNightmareMode = useCallback((fn: (v: boolean) => boolean) => {
+    setState((s) => ({ ...s, nightmareMode: fn(s.nightmareMode) }));
+  }, []);
+  const setChar1Counts = useCallback((counts: number[] | (() => number[])) => {
+    setState((s) => ({ ...s, char1Counts: typeof counts === "function" ? counts() : counts }));
+  }, []);
+  const setChar2Counts = useCallback((counts: number[] | (() => number[])) => {
+    setState((s) => ({ ...s, char2Counts: typeof counts === "function" ? counts() : counts }));
+  }, []);
+  const setChar3Counts = useCallback((counts: number[] | (() => number[])) => {
+    setState((s) => ({ ...s, char3Counts: typeof counts === "function" ? counts() : counts }));
+  }, []);
+
   const resetAll = useCallback(() => {
-    setChar1Counts(initialCounts());
-    setChar2Counts(initialCounts());
-    setChar3Counts(initialCounts());
+    setState((s) => ({
+      ...s,
+      char1Counts: initialCounts(),
+      char2Counts: initialCounts(),
+      char3Counts: initialCounts(),
+    }));
   }, []);
 
   return (
@@ -77,13 +162,14 @@ export default function Home() {
                     value={tier}
                     onChange={(e) => {
                       const v = parseInt(e.target.value, 10);
-                      if (!Number.isNaN(v)) setTier(Math.max(1, v));
+                      if (!Number.isNaN(v)) setTier( Math.min(15, Math.max(1, v)))
+                      else setTier(1);
                     }}
                     className="h-9 w-10 border-0 border-x border-zinc-600 bg-transparent text-center text-sm font-medium text-white [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                   <button
                     type="button"
-                    onClick={() => setTier((t) => t + 1)}
+                    onClick={() => setTier((t) => Math.min(15, t + 1))}
                     className="flex h-9 w-9 items-center justify-center text-zinc-300 transition hover:bg-zinc-700 hover:text-white"
                     aria-label="TIER 增加"
                   >
