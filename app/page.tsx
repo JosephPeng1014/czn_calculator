@@ -177,7 +177,7 @@ export default function Home() {
                   </button>
                 </div>
                 <span className="text-sm text-zinc-400">
-                  上限 <span className="font-medium text-zinc-200">{maxPoints}</span> pt
+                  上限 <span className={nightmareMode ? "font-medium text-yellow-300" : "font-medium text-zinc-200"}>{maxPoints}</span> pt
                 </span>
               </div>
 
