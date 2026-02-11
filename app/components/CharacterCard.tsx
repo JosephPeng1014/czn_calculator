@@ -7,7 +7,7 @@ import CardTypeCounter from "./CardTypeCounter";
 const COPY_CARD_POINTS = [0, 0, 40, 40];
 
 const CARD_CONFIG = [
-  { label: "刪階初始卡片", max: 5, points: (c: number) => Math.min(c, 5) * 20 },
+  { label: "刪除初始卡片", max: 5, points: (c: number) => Math.min(c, 5) * 20 },
   {
     label: "複製卡片",
     max: 4,
