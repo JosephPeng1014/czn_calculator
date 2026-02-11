@@ -105,10 +105,10 @@ function CalculatorContent() {
           <div className="mx-auto mt-1 h-px w-16 bg-zinc-600" aria-hidden />
 
           {/* 控制列 */}
-          <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-zinc-600/60 bg-zinc-800/50 px-5 py-4 shadow-xl shadow-black/20 backdrop-blur sm:px-6">
-            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-center sm:gap-8">
+          <div className="mx-auto mt-8 rounded-2xl border border-zinc-600/60 bg-zinc-800/50 px-5 py-4 shadow-xl shadow-black/20 backdrop-blur sm:px-6">
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-4">
               {/* TIER */}
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex min-w-0 flex-1 items-center justify-center gap-3 sm:justify-center">
                 <span className="min-w-12 text-right text-sm font-medium text-zinc-500 sm:text-zinc-400">
                   TIER
                 </span>
@@ -145,7 +145,7 @@ function CalculatorContent() {
               </div>
 
               {/* 上限 pt */}
-              <div className="flex items-center justify-center gap-2 rounded-xl bg-zinc-700/50 px-4 py-2.5">
+              <div className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-zinc-700/50 px-4 py-2.5 sm:justify-center">
                 <span className="text-sm text-zinc-500">上限</span>
                 <span className="text-lg font-bold tabular-nums text-zinc-100">
                   {maxPoints}
@@ -154,14 +154,16 @@ function CalculatorContent() {
               </div>
 
               {/* 全部重置 */}
-              <button
-                type="button"
-                onClick={resetAll}
-                className="flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-600/90 px-2 py-1 text-sm font-medium text-white transition hover:border-amber-400/60 hover:bg-amber-500 active:bg-amber-600"
-              >
-                <span aria-hidden className="text-base">↻</span>
-                全部重置
-              </button>
+              <div className="flex min-w-0 flex-1 items-center justify-center sm:justify-center">
+                <button
+                  type="button"
+                  onClick={resetAll}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-600/90 px-2.5 py-1 text-sm font-medium text-white transition hover:border-amber-400/60 hover:bg-amber-500 active:bg-amber-600"
+                >
+                  <span aria-hidden className="text-base">↻</span>
+                  全部重置
+                </button>
+              </div>
             </div>
           </div>
         </header>
